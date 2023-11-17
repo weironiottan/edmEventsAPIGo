@@ -7,3 +7,7 @@ type EdmEvent struct {
 	TicketUrl      string `json:"TicketUrl,omitempty"`
 	ArtistImageUrl string `json:"ArtistImageUrl,omitempty"`
 }
+
+type EdmEventNotFound struct {
+	Description string `json:"Description,omitempty"`
+}

@@ -81,7 +81,9 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/home", app.home)
 	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
-	mux.HandleFunc("/", app.notFoundRoute)
+	mux.HandleFunc("/find-edm/all-events", app.GetAllEvents)
+	mux.HandleFunc("/find-edm/venue", app.GetEdmEventByClubName)
+	mux.HandleFunc("/find-edm/artist", app.GetEdmEventByArtistName)
 
 	// Declare a HTTP server with some sensible timeout settings, which listens on the
 	// port provided in the config struct and uses the servemux we created above as the
