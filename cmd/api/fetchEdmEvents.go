@@ -10,6 +10,7 @@ const QUERY_ARTISTNAME = "artistname"
 const QUERY_EVENTDATE = "eventdate"
 
 func (app *application) GetAllEvents(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	edmEvents, err := app.dbSnippets.FindAll()
 
 	if err != nil {
@@ -23,8 +24,6 @@ func (app *application) GetAllEvents(w http.ResponseWriter, r *http.Request) {
 		err = app.writeJSON(w, http.StatusNotFound, e, nil)
 	}
 
-	err = app.writeJSON(w, http.StatusOK, edmEvents, nil)
-
 	if err != nil {
 		app.logger.Print(err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
@@ -33,6 +32,7 @@ func (app *application) GetAllEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetEdmEventByClubName(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	query := r.URL.Query().Get(QUERY_CLUBNAME)
 	fmt.Println(query)
 	edmEvents, err := app.dbSnippets.FindAllWithFilter(QUERY_CLUBNAME, query)
@@ -56,6 +56,7 @@ func (app *application) GetEdmEventByClubName(w http.ResponseWriter, r *http.Req
 }
 
 func (app *application) GetEdmEventByArtistName(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	query := r.URL.Query().Get(QUERY_ARTISTNAME)
 	fmt.Println(query)
 	edmEvents, err := app.dbSnippets.FindAllWithFilter(QUERY_ARTISTNAME, query)
@@ -79,3 +80,7 @@ func (app *application) GetEdmEventByArtistName(w http.ResponseWriter, r *http.R
 }
 
 /// just need to add the const QUERY_EVENTDATE and this portion should be wrapped up
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
