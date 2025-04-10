@@ -4,7 +4,6 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 )
 
 type SnippetModeler interface {
@@ -25,7 +24,7 @@ func (m *SnippetModel) FindAll() ([]EdmEvent, error) {
 	collRef := m.Client.Collection(m.Collection)
 
 	// Create a query that sorts by eventdate in ascending order
-	query := collRef.OrderBy("eventdate", firestore.Asc)
+	query := collRef.OrderBy("EventDate", firestore.Asc)
 
 	// Execute the query
 	iter := query.Documents(ctx)
@@ -53,13 +52,14 @@ func (m *SnippetModel) FindAll() ([]EdmEvent, error) {
 	return edmEvents, nil
 }
 
+// This needs to be reworked later
 func (m *SnippetModel) FindAllWithFilter(field string, value string) ([]EdmEvent, error) {
 	ctx := context.Background()
 
 	// Get a reference to the collection
 	collRef := m.Client.Collection(m.Collection)
 
-	query := collRef.Where(field, "==", value).OrderBy("eventdate", firestore.Asc)
+	query := collRef.Where(field, "==", value).OrderBy("EventDate", firestore.Asc)
 
 	// Execute the query
 	iter := query.Documents(ctx)
@@ -85,18 +85,4 @@ func (m *SnippetModel) FindAllWithFilter(field string, value string) ([]EdmEvent
 	}
 
 	return edmEvents, nil
-}
-
-// Alternative initialization with credentials file
-func NewSnippetModelWithCredentials(ctx context.Context, projectID, credentialsFile, collection string) (*SnippetModel, error) {
-	// Create a Firestore client with credentials
-	client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile(credentialsFile))
-	if err != nil {
-		return nil, err
-	}
-
-	return &SnippetModel{
-		Client:     client,
-		Collection: collection,
-	}, nil
 }
