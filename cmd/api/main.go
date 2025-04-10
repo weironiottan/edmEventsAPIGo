@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"fmt"
+	"google.golang.org/api/option"
 	"log"
 	"net/http"
 	"os"
@@ -66,7 +67,8 @@ func main() {
 	}
 
 	db, err := app.openDB()
-
+	// Firestore Debugging Mode
+	//db, err := app.openDBDebuggingMode()
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -102,8 +104,23 @@ func (app *application) openDB() (*firestore.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	fmt.Println("Connected to Firestore!")
 
+	return client, nil
+}
+
+// Alternative initialization with credentials file
+func (app *application) openDBDebuggingMode() (*firestore.Client, error) {
+	// Create a Firestore client with credentials from GCP SA
+	credentialsJSON := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+	if credentialsJSON == "" {
+		log.Fatalf("Environment variable not set %v", credentialsJSON)
+	}
+	ctx := context.Background()
+	option.WithCredentialsJSON([]byte(credentialsJSON))
+	client, err := firestore.NewClientWithDatabase(ctx, app.dbConfig.projectID, app.dbConfig.databaseID, option.WithCredentialsJSON([]byte(credentialsJSON)))
+	if err != nil {
+		return nil, err
+	}
 	return client, nil
 }
