@@ -1,0 +1,43 @@
+# Builds the API image, pushes it to Artifact Registry and deploys it to Cloud Run.
+#
+# Intended to run from a Cloud Build trigger on pushes to main. For a manual run:
+#   gcloud builds submit --config cloudbuild.yaml --substitutions _TAG=$(git rev-parse HEAD)
+
+substitutions:
+  _REGION: us-central1
+  _SERVICE_NAME: edm-events-las-vegas-api
+  _AR_REPO: cloud-run-source-deploy
+  _IMAGE: ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/edmeventsapigo/${_SERVICE_NAME}
+  _DATABASE_ID: edm-events-database
+  _COLLECTION_NAME: edm-events
+  # Triggers set COMMIT_SHA; manual runs should pass _TAG explicitly.
+  _TAG: ${COMMIT_SHA}
+
+options:
+  dynamicSubstitutions: true
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${_IMAGE}:${_TAG}", "."]
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args: ["push", "${_IMAGE}:${_TAG}"]
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --image=${_IMAGE}:${_TAG}
+      - --region=${_REGION}
+      - --platform=managed
+      - --set-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID},DATABASE_ID=${_DATABASE_ID},COLLECTION_NAME=${_COLLECTION_NAME}
+      - --quiet
+
+images:
+  - ${_IMAGE}:${_TAG}
