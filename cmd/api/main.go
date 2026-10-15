@@ -86,6 +86,7 @@ func main() {
 	mux.HandleFunc("/find-edm/all-events", app.GetAllEvents)
 	mux.HandleFunc("/find-edm/venue", app.GetEdmEventByClubName)
 	mux.HandleFunc("/find-edm/artist", app.GetEdmEventByArtistName)
+	mux.HandleFunc("/find-edm/last-updated", app.GetLastUpdated)
 
 	// Start the HTTP server.
 	logger.Printf("starting server on %s", port)
